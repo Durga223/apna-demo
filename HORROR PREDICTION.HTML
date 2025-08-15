@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dark Omen — Name Prediction</title>
+  <!-- Horror Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Nosifer&family=Creepster&family=Butcherman&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --blood:#c00000;
+      --gore:#7a0000;
+      --neon:#ff0022;
+      --mist:#9aa0a6;
+      --ink:#0b0b0f;
+      --bg1:#0a0003;
+      --bg2:#110009;
+      --bg3:#1a000d;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; overflow:hidden; color:#eee;
+      background: radial-gradient(1200px 800px at 20% 10%, rgba(255,0,50,0.06), transparent 60%),
+                  radial-gradient(900px 600px at 80% 90%, rgba(200,0,0,0.07), transparent 60%),
+                  linear-gradient( to bottom, var(--bg1), var(--bg2) 40%, var(--bg3));
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+      animation: hueShift 18s linear infinite;
+    }
+
+    /* swirling animated smoke layers */
+    .fog, .fog::before, .fog::after{
+      position:fixed; inset:-20vmax; pointer-events:none;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800"><filter id="f"><feTurbulence type="fractalNoise" baseFrequency="0.008" numOctaves="3" seed="7"/><feColorMatrix type="saturate" values="0"/><feGaussianBlur stdDeviation="2"/></filter><rect width="100%" height="100%" filter="url(%23f)" fill="white" opacity="0.35"/></svg>') repeat;
+      mix-blend-mode: screen; opacity:0.13; filter: blur(2px);
+      animation: drift 60s linear infinite;
+    }
+    .fog::before{content:""; animation-duration:95s; opacity:0.18; transform: scale(1.2) rotate(5deg);}
+    .fog::after{content:""; animation-duration:120s; opacity:0.22; transform: scale(1.4) rotate(-8deg);}
+
+    /* crawling vignette */
+    .vignette{ position:fixed; inset:0; pointer-events:none; box-shadow: inset 0 0 200px 60px #000; mix-blend-mode:multiply;}
+
+    /* bats */
+    .bats{ position:fixed; inset:0; pointer-events:none; }
+    .bat{ position:absolute; font-size:2.2rem; opacity:0.85; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.6));
+      animation: flap 0.6s ease-in-out infinite alternate, fly var(--dur,18s) linear infinite; }
+
+    /* container */
+    .wrap{ position:relative; display:grid; place-items:center; height:100dvh; padding:2rem;}
+
+    .panel{
+      width:min(680px, 92vw);
+      background: rgba(10,0,5,0.55);
+      border: 2px solid #22000a;
+      border-radius: 24px;
+      backdrop-filter: blur(6px) saturate(120%);
+      box-shadow: 0 0 30px rgba(255,0,30,0.08), 0 20px 60px rgba(0,0,0,0.6);
+      padding: clamp(1.25rem, 3vw, 2rem);
+    }
+
+    .title{
+      font-family: 'Nosifer', system-ui;
+      margin:0 0 0.25rem; font-size: clamp(2rem, 4vw + 1rem, 4rem);
+      letter-spacing: 1px; text-align:center; color: var(--neon);
+      text-shadow: 0 0 14px rgba(255,0,34,0.35), 0 0 40px rgba(255,0,34,0.18);
+      animation: flicker 6s infinite;
+    }
+    .subtitle{ font-family:'Creepster', cursive; text-align:center; margin:0 0 1rem; letter-spacing:1px; font-size:clamp(1rem, 1.2rem + 0.5vw, 1.35rem); opacity:0.9 }
+
+    .inputRow{ display:flex; gap:0.75rem; align-items:center; margin: 0.75rem 0 1.125rem; }
+    input[type="text"]{
+      flex:1; padding: 0.85rem 1rem; border-radius: 14px; border:2px solid var(--gore);
+      background: rgba(20,0,10,0.6); color:#f2f2f2; outline:none;
+      font-family:'Butcherman', cursive; letter-spacing:0.5px; font-size:1rem;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.5), 0 0 18px rgba(255,0,40,0.09);
+      transition: border-color .2s ease, box-shadow .2s ease, transform .08s ease;
+    }
+    input[type="text"]:focus{ border-color: var(--neon); box-shadow: 0 0 18px rgba(255,0,30,0.22), inset 0 0 8px rgba(255,0,30,0.05); transform: translateY(-1px);}
+
+    button{
+      font-family:'Creepster', cursive; font-size:1.05rem; letter-spacing:1px; color:white;
+      background: linear-gradient(180deg, #2a000a, #5a0010 65%, #2a000a);
+      border:2px solid var(--gore); border-radius:14px; padding:0.85rem 1.1rem; cursor:pointer;
+      text-shadow: 0 0 8px rgba(255,0,30,0.3);
+      box-shadow: 0 10px 16px rgba(0,0,0,0.5), inset 0 -6px 12px rgba(0,0,0,0.4);
+      position:relative; overflow:hidden; transition: transform .08s ease, box-shadow .2s ease;
+    }
+    button:hover{ box-shadow: 0 12px 22px rgba(0,0,0,0.6), 0 0 30px rgba(255,0,40,0.15) inset }
+    button:active{ transform: translateY(1px)}
+    /* dripping blood effect */
+    button::after{
+      content:""; position:absolute; left:50%; top:0; width:2px; height:0; background: var(--blood);
+      box-shadow: 0 0 10px rgba(255,0,30,0.45);
+      animation: drip 4s ease-in-out infinite; border-radius: 3px;
+    }
+
+    .result{
+      min-height: 3.6rem;
+      border-radius:14px; border:1px dashed rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.25);
+      padding:1rem; margin-top:0.75rem;
+      font-family:'Butcherman', cursive; font-size:1.3rem; line-height:1.5; letter-spacing:0.4px;
+      text-shadow: 0 0 10px rgba(255,0,40,0.15);
+      animation: subtleGlow 5s ease-in-out infinite;
+      white-space: pre-wrap;
+    }
+
+    .footer{ opacity:0.7; text-align:center; margin-top:0.75rem; font-size:0.9rem; font-family:'Creepster', cursive }
+
+    /* keyframes */
+    @keyframes drift{ from{background-position:0 0} to{background-position:1000px 0} }
+    @keyframes hueShift{ 0%{filter:hue-rotate(0deg)} 100%{filter:hue-rotate(360deg)} }
+    @keyframes flap{ from{ transform: translateY(0) scale(1) rotate(-6deg)} to{ transform: translateY(-8px) scale(1.05) rotate(6deg)} }
+    @keyframes fly{
+      0%{ transform: translateX(110vw) translateY(var(--y,20vh)) rotate(0deg) }
+      100%{ transform: translateX(-120vw) translateY(calc(var(--y,20vh) - 10vh)) rotate(-10deg) }
+    }
+    @keyframes drip{ 0%{ height:0; transform: translateX(-50%)} 65%{ height: 28px} 100%{ height:0; top:100%;} }
+    @keyframes subtleGlow{ 0%,100%{ box-shadow: 0 0 0 rgba(255,0,30,0)} 50%{ box-shadow: 0 0 40px rgba(255,0,30,0.15) } }
+    @keyframes flicker{ 0%{ opacity:1 } 2%{ opacity:.5 } 4%{ opacity:1 } 8%{ opacity:.8 } 10%{ opacity:1 } 14%{ opacity:.6 } 16%{ opacity:1 } 20%{ opacity:.7 } 22%{ opacity:1 } 25%{ opacity:.4 } 27%{ opacity:1 } 100%{ opacity:1 } }
+    @keyframes typewriter{ from{ width:0 } to{ width:100% } }
+    @keyframes heartbeat{ 0%,100%{ transform: scale(1)} 30%{ transform: scale(1.02)} 50%{ transform: scale(0.98)} 70%{ transform: scale(1.03)} }
+
+    .tw{ width:0; overflow:hidden; border-right: 2px solid rgba(255,255,255,0.6); white-space:nowrap; animation: typewriter 2.6s steps(40) 1 both }
+
+    /* responsive tweaks */
+    @media (max-width:480px){
+      .bat{ font-size:1.6rem }
+      .subtitle{ font-size:1rem }
+      .result{ font-size:1.1rem }
+    }
+  </style>
+</head>
+<body>
+  <div class="fog"></div>
+  <div class="vignette"></div>
+  <div class="bats" aria-hidden="true" id="bats"></div>
+
+  <main class="wrap">
+    <section class="panel" role="region" aria-label="Horror prediction">
+      <h1 class="title">Dark Omen</h1>
+      <p class="subtitle">Whisper your name to learn tonight's fate...</p>
+
+      <div class="inputRow">
+        <label class="sr-only" for="name">Your Name</label>
+        <input id="name" type="text" placeholder="Enter your name..." autocomplete="name" maxlength="40" />
+        <button id="btn" type="button" aria-label="Reveal prediction">Summon</button>
+      </div>
+
+      <div id="result" class="result" aria-live="polite"></div>
+      <p class="footer">☾ Not astrology. Just vibes. ☽</p>
+    </section>
+  </main>
+
+  <script>
+    // Accessibility helper for screen-readers
+    const srOnly = document.createElement('style');
+    srOnly.textContent = `.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}`;
+    document.head.appendChild(srOnly);
+
+    // Spawn bats
+    const batLayer = document.getElementById('bats');
+    const batCount = Math.min(14, Math.max(6, Math.floor(window.innerWidth/120)));
+    for(let i=0;i<batCount;i++){
+      const b = document.createElement('div');
+      b.className='bat'; b.style.setProperty('--y', Math.floor(Math.random()*90)+ 'vh');
+      b.style.left = Math.random()*100 + 'vw';
+      b.style.top = Math.random()*60 + 'vh';
+      b.style.setProperty('--dur', (14 + Math.random()*14) + 's');
+      b.textContent='🦇';
+      batLayer.appendChild(b);
+    }
+
+    const btn = document.getElementById('btn');
+    const input = document.getElementById('name');
+    const result = document.getElementById('result');
+
+    const predictions = [
+      "${name}, a cold whisper follows you. Do not turn around.",
+      "Tonight, ${name}, the mirror will blink before you do.",
+      "${name}, a door you thought was locked… isn’t.",
+      "Beware the third knock, ${name}. The house knows your steps.",
+      "${name}, a shadow will learn your shape and keep it.",
+      "The phone will ring once. Only once. Don’t answer, ${name}.",
+      "${name}, something in the dark remembers you.",
+      "If the lights flicker at 3:13, ${name}, hide under the bed.",
+      "${name}, a stranger will hum your favorite song from the hallway.",
+      "Your window will fog from the outside, ${name}. There’s no one there.",
+      "${name}, the photograph on your shelf will change its smile.",
+      "Count your steps, ${name}. On the 14th, a new footstep joins.",
+      "${name}, don’t look behind the curtain. It looks back.",
+      "You’ll smell damp earth indoors, ${name}. Something was buried wrong.",
+      "${name}, the attic knows your full name. It will say it once.",
+      "If you hear your own voice in the kitchen, ${name}, leave the house.",
+      "${name}, sleep facing the door. It won’t.",
+      "A music box will play on its own, ${name}. Let it finish.",
+      "${name}, you’ll feel a breath that isn’t yours. Don’t inhale.",
+      "Keep the closet closed tonight, ${name}. It prefers it open."
+    ];
+
+    function personalize(template, name){
+      const clean = (name || '').trim();
+      const safe = clean ? clean.replace(/[^\p{L}\p{N} _.-]/gu, '').slice(0,24) : 'Stranger';
+      return template.replaceAll('${name}', safe);
+    }
+
+    function typeOut(text){
+      result.innerHTML = '';
+      const span = document.createElement('span');
+      span.className = 'tw';
+      span.textContent = text;
+      result.appendChild(span);
+      // retrigger CSS animation
+      void span.offsetWidth; // reflow
+      span.style.animation = 'typewriter 2.6s steps(' + Math.max(20, text.length) + ') 1 both';
+    }
+
+    function pickPrediction(){
+      const nameVal = input.value;
+      const msg = personalize(predictions[Math.floor(Math.random()*predictions.length)], nameVal);
+      typeOut(msg);
+      // heartbeat pulse on panel
+      document.querySelector('.panel').style.animation = 'heartbeat 0.9s ease 1';
+      setTimeout(()=>{ document.querySelector('.panel').style.animation = '' }, 900);
+    }
+
+    btn.addEventListener('click', pickPrediction);
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter') pickPrediction(); });
+
+    // Easter egg: if the user types certain names, change the vibe slightly
+    const cursed = new Set(['samara','valak','annabelle','kayako','pennywise','conjuring','raghul','durga']);
+    input.addEventListener('input', ()=>{
+      const v = input.value.trim().toLowerCase();
+      document.body.style.setProperty('--blood', cursed.has(v) ? '#ff0033' : '#c00000');
+    });
+
+    // Auto-focus input on load
+    setTimeout(()=> input.focus(), 400);
+  </script>
+</body>
+</html>
