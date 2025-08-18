@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doomed Fate Teller - Enhanced</title>
+    <link href="https://fonts.googleapis.com/css2?family=Eater&family=Nosifer&family=Creepster&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            font-family: 'Eater', cursive;
+            color: #d00;
+            height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12,2A7,7 0 0,0 5,9C5,11.38 6.19,13.47 8,14.74V17A1,1 0 0,0 9,18H15A1,1 0 0,0 16,17V14.74C17.81,13.47 19,11.38 19,9A7,7 0 0,0 12,2M9,21A1,1 0 0,0 10,22H14A1,1 0 0,0 15,21V20H9V21Z' fill='%23ff0000'/%3E%3C/svg%3E"), auto;
+        }
+        
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #300 0%, #000 80%);
+            z-index: -3;
+        }
+        
+        .blood-drips {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(200,0,0,0.15) 0.5px, transparent 1px),
+                radial-gradient(circle at 30% 40%, rgba(200,0,0,0.15) 0.5px, transparent 1px),
+                radial-gradient(circle at 70% 80%, rgba(200,0,0,0.15) 0.5px, transparent 1px),
+                radial-gradient(circle at 90% 10%, rgba(200,0,0,0.15) 0.5px, transparent 1px);
+            background-size: 70px 70px;
+            animation: drip 8s infinite linear;
+        }
+        
+        .floating-eyes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        .eye {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: #f00;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #f00, 0 0 20px #f00;
+            animation: blink 4s infinite, float 15s infinite linear;
+        }
+        
+        .pupil {
+            position: absolute;
+            top: 7px;
+            left: 7px;
+            width: 8px;
+            height: 8px;
+            background: #000;
+            border-radius: 50%;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .title {
+            font-family: 'Nosifer', cursive;
+            font-size: 3.5rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 8px #f00, 0 0 16px #f00, 0 0 24px #800;
+            animation: flicker 2.5s infinite alternate;
+            transform: rotate(-2deg);
+            line-height: 1.2;
+            padding: 0.5rem;
+            border-bottom: 3px solid #900;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+        
+        .subtitle {
+            font-family: 'Creepster', cursive;
+            font-size: 1.8rem;
+            margin-bottom: 2.5rem;
+            text-shadow: 0 0 5px #f00;
+            animation: pulse 3s infinite;
+            color: #e44;
+            max-width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.4;
+        }
+        
+        .input-container {
+            margin-bottom: 2rem;
+            position: relative;
+            background: rgba(20, 0, 0, 0.6);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 0 20px rgba(200, 0, 0, 0.4);
+            border: 2px solid #800;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .name-label {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 1.2rem;
+            text-shadow: 0 0 5px #f00;
+            color: #f88;
+            font-family: 'Creepster', cursive;
+        }
+        
+        .name-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            font-size: 1.4rem;
+            background: rgba(15, 0, 0, 0.9);
+            border: 2px solid #900;
+            border-radius: 8px;
+            color: #f44;
+            font-family: 'Creepster', cursive;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(255,0,0,0.5);
+            transition: all 0.3s;
+            letter-spacing: 1px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .name-input:focus {
+            outline: none;
+            border-color: #f00;
+            box-shadow: 0 0 15px #f00, inset 0 0 10px rgba(255,0,0,0.3);
+            background: rgba(25, 0, 0, 0.9);
+        }
+        
+        .name-input::placeholder {
+            color: #944;
+            opacity: 0.7;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(to bottom, #800, #500);
+            color: #fff;
+            font-family: 'Eater', cursive;
+            font-size: 1.6rem;
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            box-shadow: 0 0 15px rgba(255,0,0,0.7), 0 5px 0 #400;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            margin-top: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .submit-btn:hover {
+            background: linear-gradient(to bottom, #a00, #700);
+            box-shadow: 0 0 25px #f00, 0 5px 0 #600;
+            transform: translateY(-2px);
+        }
+        
+        .submit-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 0 15px rgba(255,0,0,0.7), 0 1px 0 #400;
+        }
+        
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+             NIGHT.",
+                    "{name}, THE DARKNESS KNOWS YOUR NAME BUT HAS BIGGER PREY TONIGHT.",background: linear-gradient(90deg, transparent, rgba(255,0,0,0.4), transparent);
+            transition: 0.5s;
+        }
+        
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+        
+        .result-container {
+            margin-top: 2rem;
+            min-height: 220px;
+            padding: 2.5rem 2rem;
+            background: rgba(10, 0, 0, 0.75);
+            border: 3px solid #900;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            display: none;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 0 30px rgba(200, 0, 0, 0.3);
+        }
+        
+        .result-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="none" stroke="%23900" stroke-width="1" opacity="0.15"/></svg>');
+            background-size: 25px 25px;
+            z-index: -1;
+        }
+        
+        .result-title {
+            font-family: 'Nosifer', cursive;
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 10px #f00;
+            animation: flicker 3s infinite alternate;
+            color: #f55;
+            letter-spacing: 2px;
+        }
+        
+        .result-text {
+            font-family: 'Creepster', cursive;
+            font-size: 1.7rem;
+            line-height: 1.6;
+            text-shadow: 0 0 5px #f00;
+            animation: fadeIn 1.5s;
+            color: #e99;
+            padding: 0 1rem;
+        }
+        
+        .skull {
+            position: absolute;
+            font-size: 2.5rem;
+            animation: floatSkull 25s infinite linear;
+            opacity: 0.3;
+            z-index: -1;
+            text-shadow: 0 0 10px #f00;
+        }
+        
+        .blood-splatter {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M50,15 C60,25 65,40 60,50 C55,60 40,65 30,60 C20,55 15,40 20,30 C25,20 40,5 50,15 Z" fill="%23ff0000" opacity="0.08"/></svg>');
+            background-repeat: no-repeat;
+            background-size: 180px;
+            z-index: -1;
+            animation: splatter 20s infinite;
+        }
+        
+        .severed-hand {
+            position: absolute;
+            font-size: 2.5rem;
+            bottom: -50px;
+            right: 10%;
+            animation: crawl 25s infinite linear;
+            transform: rotate(90deg);
+            filter: drop-shadow(0 0 4px #f00);
+        }
+        
+        .warning {
+            margin-top: 1.5rem;
+            font-family: 'Creepster', cursive;
+            font-size: 1.2rem;
+            color: #a44;
+            text-shadow: 0 0 3px #f00;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+        }
+        
+        .footer {
+            margin-top: 2rem;
+            padding: 1rem;
+            font-family: 'Eater', cursive;
+            font-size: 1rem;
+            color: #744;
+            text-align: center;
+            border-top: 1px solid #500;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        @keyframes flicker {
+            0% { opacity: 0.9; text-shadow: 0 0 8px #f00; }
+            5% { opacity: 0.6; text-shadow: 0 0 5px #f00; }
+            10% { opacity: 1; text-shadow: 0 0 12px #f00, 0 0 18px #f00; }
+            15% { opacity: 0.8; }
+            20% { opacity: 0.95; }
+            25% { opacity: 0.7; text-shadow: 0 0 5px #f00; }
+            30% { opacity: 1; text-shadow: 0 0 8px #f00, 0 0 24px #800; }
+            100% { opacity: 1; text-shadow: 0 0 8px #f00, 0 0 16px #f00, 0 0 24px #800; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.03); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.9; }
+        }
+        
+        @keyframes blink {
+            0%, 45%, 55%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.1); }
+        }
+        
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(15px, 15px); }
+            50% { transform: translate(30px, 0); }
+            75% { transform: translate(15px, -15px); }
+            100% { transform: translate(0, 0); }
+        }
+        
+        @keyframes drip {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 80px; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes floatSkull {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(80px, 80px) rotate(90deg); }
+            50% { transform: translate(160px, 40px) rotate(180deg); }
+            75% { transform: translate(40px, 120px) rotate(270deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+        
+        @keyframes splatter {
+            0% { background-position: 10% 10%; opacity: 0.1; }
+            25% { background-position: 90% 30%; opacity: 0.15; }
+            50% { background-position: 50% 70%; opacity: 0.1; }
+            75% { background-position: 80% 90%; opacity: 0.15; }
+            100% { background-position: 10% 10%; opacity: 0.1; }
+        }
+        
+        @keyframes crawl {
+            0% { transform: translateX(100vw) rotate(90deg); }
+            100% { transform: translateX(-200px) rotate(90deg); }
+        }
+        
+        .typewriter {
+            overflow: hidden;
+            border-right: 2px solid #f44;
+            white-space: pre-wrap;
+            margin: 0 auto;
+            letter-spacing: 1px;
+            animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
+            word-wrap: break-word;
+            word-break: break-word;
+        }
+        
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent; }
+            50% { border-color: #f44; }
+        }
+        
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2.5rem;
+                padding: 0.3rem;
+            }
+            .subtitle {
+                font-size: 1.5rem;
+                max-width: 95%;
+            }
+            .result-text {
+                font-size: 1.5rem;
+            }
+            .input-container {
+                padding: 1.5rem;
+            }
+            .name-input {
+                font-size: 1.2rem;
+                padding: 0.8rem;
+            }
+            .submit-btn {
+                font-size: 1.4rem;
+                padding: 0.8rem 1.8rem;
+            }
+            .result-container {
+                padding: 1.8rem 1.5rem;
+                min-height: 180px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .title {
+                font-size: 2rem;
+            }
+            .subtitle {
+                font-size: 1.3rem;
+            }
+            .name-label {
+                font-size: 1.3rem;
+            }
+            .result-title {
+                font-size: 1.6rem;
+            }
+            .result-text {
+                font-size: 1.3rem;
+            }
+            .submit-btn {
+                font-size: 1.3rem;
+                padding: 0.7rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="blood-drips"></div>
+    <div class="floating-eyes" id="eyes-container"></div>
+    <div class="blood-splatter"></div>
+    
+    <div class="container">
+        <h1 class="title">DOOMED FATE TELLER</h1>
+        <p class="subtitle">Enter your name... if you dare...</p>
+        
+        <div class="input-container">
+            <label for="name" class="name-label">YOUR NAME:</label>
+            <input type="text" id="name" class="name-input" placeholder="Enter your cursed name...">
+            <button id="submit" class="submit-btn">
+                <i class="fas fa-skull"></i>
+                REVEAL YOUR DOOM
+            </button>
+        </div>
+        
+        <p class="warning">Warning: The revelations you receive may be disturbing. Proceed with caution.</p>
+        
+        <div class="result-container" id="result">
+            <h2 class="result-title">YOUR HORRIFYING FATE:</h2>
+            <p class="result-text" id="fortune"></p>
+        </div>
+        
+        <div class="footer">
+            <p>This cursed device reveals only the darkest truths. Use at your own peril.</p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Create floating eyes (reduced number for better UI)
+            const eyesContainer = document.getElementById('eyes-container');
+            for (let i = 0; i < 12; i++) {
+                const eye = document.createElement('div');
+                eye.className = 'eye';
+                eye.style.left = ${Math.random() * 100}%;
+                eye.style.top = ${Math.random() * 100}%;
+                eye.style.animationDuration = ${12 + Math.random() * 18}s;
+                
+                const pupil = document.createElement('div');
+                pupil.className = 'pupil';
+                eye.appendChild(pupil);
+                
+                eyesContainer.appendChild(eye);
+            }
+            
+            // Create floating skulls
+            const container = document.querySelector('.container');
+            for (let i = 0; i < 4; i++) {
+                const skull = document.createElement('div');
+                skull.className = 'skull';
+                skull.innerHTML = '💀';
+                skull.style.left = ${Math.random() * 100}%;
+                skull.style.top = ${Math.random() * 100}%;
+                skull.style.animationDuration = ${35 + Math.random() * 25}s;
+                container.appendChild(skull);
+            }
+            
+            // Create crawling hand
+            const hand = document.createElement('div');
+            hand.className = 'severed-hand';
+            hand.innerHTML = '🖐';
+            hand.style.animationDuration = ${25 + Math.random() * 10}s;
+            document.body.appendChild(hand);
+            
+            // Fortune predictions (enhanced with more variety)
+            const fortunes = {
+                brutal: [
+                    "{name}, YOUR SCREAMS WILL ECHO IN THE VOID AS THE SHADOWS CONSUME YOU TONIGHT.",
+                    "{name}, YOUR BLOOD WILL PAINT THE WALLS BEFORE THE NEXT MOON RISES.",
+                    "{name}, THE CREATURE UNDER YOUR BED HAS CHOSEN TONIGHT TO FEAST.",
+                    "{name}, YOUR REFLECTION IN THE MIRROR HAS PLANS FOR YOU... DEADLY PLANS.",
+                    "{name}, THEY'VE BEEN WAITING FOR YOU... AND TONIGHT THEY CLAIM YOUR SOUL.",
+                    "{name}, THE DARKNESS WILL CLAIM YOU BEFORE DAWN... YOUR STRUGGLE IS FUTILE."
+                ],
+                bad: [
+                    "{name}, THE WHISPERS IN THE DARK ARE CALLING YOUR NAME... ANSWER AT YOUR PERIL.",
+                    "{name}, YOU WILL LOSE SOMETHING PRECIOUS TONIGHT... AND IT'S ONLY THE BEGINNING.",
+                    "{name}, THE THING THAT FOLLOWS YOU IN YOUR DREAMS IS GETTING CLOSER EACH NIGHT.",
+                    "{name}, YOUR SHADOW HAS STARTED MOVING ON ITS OWN... AND IT DOESN'T LIKE YOU.",
+                    "{name}, THE VOICES YOU HEAR ARE REAL... AND THEY'RE COMING FOR YOU.",
+                    "{name}, A CURSE HAS BEEN PLACED UPON YOU... IT MANIFESTS AT MIDNIGHT."
+                ],
+                normal: [
+                    "{name}, THE SPIRITS ARE WATCHING... ALWAYS WATCHING... BUT NOT TONIGHT.",
+                    "{name}, THE CHILL DOWN YOUR SPINE IS JUST A BREEZE... OR IS IT?",
+                    "{name}, THE NIGHTMARES WILL CONTINUE... BUT YOU'LL SURVIVE ANOTHER",
+                    "{name}, THE SCRATCHING AT YOUR WINDOW IS JUST THE WIND... PROBABLY.",
+                    "{name}, YOUR FEARS WILL HAUNT YOU... BUT THEY REMAIN DREAMS FOR NOW."
+                ],
